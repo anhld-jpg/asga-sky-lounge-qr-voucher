@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ASG - Ưu Đãi Voucher Giảm Giá 10%</title>
+    <meta name="description" content="Quét QR Code nhận ngay voucher giảm giá 10% cho hóa đơn mua sắm & dịch vụ tại Cảng HKQT Nội Bài.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,400&display=swap" rel="stylesheet">
+    <style>
+        /* ========== RESET & BASE ========== */
+        *, *::before, *::after {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --red-deep: #8B0000;
+            --red-primary: #C0392B;
+            --red-bright: #E74C3C;
+            --red-light: #FF6B6B;
+            --gold-primary: #F5A623;
+            --gold-light: #FFD700;
+            --gold-accent: #FBBF24;
+            --cream: #FFF8EE;
+            --cream-light: #FFFDF7;
+            --brown-dark: #3D1A00;
+            --brown-text: #5C2E00;
+            --white: #FFFFFF;
+            --text-dark: #2D1810;
+            --text-body: #5A3D2B;
+            --text-muted: #9B7B6B;
+            --glass-border: rgba(255, 255, 255, 0.2);
+            --card-bg: rgba(255, 248, 238, 0.92);
+            --card-border: rgba(193, 154, 107, 0.35);
+            --radius: 16px;
+            --radius-sm: 12px;
+            --radius-xs: 8px;
+        }
+
+        html { scroll-behavior: smooth; }
+
+        body {
+            font-family: 'Be Vietnam Pro', sans-serif;
+            min-height: 100vh;
+            overflow-x: hidden;
+            background: #2D0A0A;
+        }
+
+        /* ========== ANIMATED RED/GOLD BACKGROUND ========== */
+        .bg-gradient {
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+            background:
+                radial-gradient(ellipse 100% 60% at 50% 0%, rgba(255, 215, 0, 0.15) 0%, transparent 50%),
+                radial-gradient(ellipse 80% 80% at 20% 20%, rgba(200, 50, 30, 0.4) 0%, transparent 60%),
+                radial-gradient(ellipse 80% 80% at 80% 80%, rgba(200, 50, 30, 0.3) 0%, transparent 60%),
+                radial-gradient(ellipse 60% 40% at 50% 30%, rgba(245, 166, 35, 0.12) 0%, transparent 50%),
+                linear-gradient(180deg, #3D0C0C 0%, #5A1010 30%, #8B2020 60%, #6B1515 100%);
+        }
+
+        .bg-gradient::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background-image:
+                radial-gradient(1.5px 1.5px at 15% 10%, rgba(255, 215, 0, 0.4), transparent),
+                radial-gradient(1px 1px at 85% 15%, rgba(255, 215, 0, 0.3), transparent),
+                radial-gradient(1.5px 1.5px at 25% 75%, rgba(255, 215, 0, 0.25), transparent),
+                radial-gradient(1px 1px at 75% 65%, rgba(255, 215, 0, 0.35), transparent),
+                radial-gradient(2px 2px at 50% 5%, rgba(255, 255, 255, 0.3), transparent),
+                radial-gradient(1px 1px at 10% 50%, rgba(255, 215, 0, 0.2), transparent);
+            animation: twinkle 4s ease-in-out infinite alternate;
+        }
+
+        @keyframes twinkle {
+            0% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+
+        /* ========== HERO IMAGE WRAPPER ========== */
+        .hero-page {
+            position: relative;
+            z-index: 2;
+            width: 100%;
+            padding: 0;
+            background: #000; /* Nền dự phòng nếu ảnh chưa kịp load */
+        }
+
+        .hero-wrapper {
+            position: relative;
+            max-width: 600px; /* Giới hạn chiều rộng để không bị quá to trên Desktop */
+            margin: 0 auto;
+            display: block;
+        }
+
+        .hero-main-img {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        /* Nút vô hình đè lên nút thật của ảnh */
+        .btn-invisible {
+            position: absolute;
+            bottom: 4.5%; /* Tọa độ canh từ dưới lên (có thể tinh chỉnh +- 1% nếu cần) */
+            left: 50%;
+            transform: translateX(-50%);
+            width: 55%;   /* Độ rộng đủ bao phủ khu vực nút */
+            height: 7%;   /* Độ cao của nút */
+            background: transparent;
+            /* background: rgba(0, 255, 0, 0.3); Bỏ comment dòng này nếu muốn thấy vị trí chính xác của nút bấm để căn chỉnh */
+            border: none;
+            cursor: pointer;
+            z-index: 10;
+        }
+
+        /* ========== OVERLAY / POPUP FORM ========== */
+        .overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 1000;
+            background: rgba(30, 5, 5, 0.8);
+            backdrop-filter: blur(10px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            opacity: 1;
+            transition: opacity 0.4s ease;
+        }
+
+        .overlay.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .popup {
+            background: linear-gradient(145deg, rgba(60, 15, 15, 0.96), rgba(40, 10, 10, 0.98));
+            border: 1px solid rgba(245, 166, 35, 0.25);
+            border-radius: var(--radius);
+            padding: 36px 28px;
+            max-width: 440px;
+            width: 100%;
+            box-shadow: 0 0 60px rgba(245, 166, 35, 0.15), 0 25px 50px rgba(0,0,0,0.5);
+            transform: translateY(0) scale(1);
+            transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.4s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .popup::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--red-bright), var(--gold-primary), var(--red-bright));
+        }
+
+        .overlay.hidden .popup {
+            transform: translateY(30px) scale(0.95);
+        }
+
+        /* Nút tắt X cho form popup */
+        .btn-close-form {
+            position: absolute;
+            top: 14px;
+            right: 18px;
+            background: transparent;
+            border: none;
+            color: #D4A07A;
+            font-size: 28px;
+            line-height: 1;
+            cursor: pointer;
+            transition: color 0.3s ease;
+            z-index: 10;
+        }
+
+        .btn-close-form:hover {
+            color: var(--white);
+        }
+
+        .popup-icon {
+            width: 64px;
+            height: 64px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--red-primary), var(--gold-primary));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            font-size: 28px;
+            box-shadow: 0 8px 24px rgba(192, 57, 43, 0.4);
+        }
+
+        .popup h2 {
+            text-align: center;
+            font-size: 22px;
+            font-weight: 700;
+            margin-bottom: 6px;
+            background: linear-gradient(135deg, var(--white), var(--gold-light));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .popup .subtitle {
+            text-align: center;
+            color: #D4A07A;
+            font-size: 14px;
+            margin-bottom: 28px;
+            line-height: 1.5;
+        }
+
+        .form-group {
+            margin-bottom: 18px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 13px;
+            font-weight: 500;
+            color: #D4A07A;
+            margin-bottom: 6px;
+        }
+
+        .form-group label .required { color: #FF6B6B; margin-left: 2px; }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px 16px;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(245, 166, 35, 0.2);
+            border-radius: var(--radius-xs);
+            color: var(--white);
+            font-family: inherit;
+            font-size: 15px;
+            transition: all 0.3s ease;
+            outline: none;
+        }
+
+        .form-group input:focus {
+            border-color: var(--gold-primary);
+            background: rgba(245, 166, 35, 0.08);
+            box-shadow: 0 0 0 3px rgba(245, 166, 35, 0.15);
+        }
+
+        .form-group input.error {
+            border-color: #FF6B6B;
+            box-shadow: 0 0 0 3px rgba(255, 107, 107, 0.15);
+        }
+
+        .error-msg {
+            font-size: 12px;
+            color: #FF6B6B;
+            margin-top: 4px;
+            display: none;
+        }
+
+        .form-group input.error + .error-msg { display: block; }
+
+        .btn-submit {
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: var(--radius-xs);
+            background: linear-gradient(135deg, var(--red-primary), var(--gold-primary));
+            color: white;
+            font-family: inherit;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 8px;
+            position: relative;
+            overflow: hidden;
+            text-transform: uppercase;
+        }
+
+        .btn-submit::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, var(--gold-primary), var(--red-bright));
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .btn-submit:hover::before { opacity: 1; }
+        .btn-submit:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(245, 166, 35, 0.4); }
+        .btn-submit span { position: relative; z-index: 1; }
+
+        /* ========== VOUCHER DISPLAY & REST OF STYLES ========== */
+        /* (Giữ nguyên các css cũ của Voucher, Nội dung chính và Footer) */
+        .voucher-overlay {
+            position: fixed; inset: 0; z-index: 1001; background: rgba(30, 5, 5, 0.85);
+            backdrop-filter: blur(12px); display: flex; align-items: center; justify-content: center;
+            padding: 20px; opacity: 0; pointer-events: none; transition: opacity 0.4s ease;
+        }
+        .voucher-overlay.show { opacity: 1; pointer-events: all; }
+        .voucher-card {
+            background: linear-gradient(145deg, #3D0C0C, #2A0808); border: 1px solid rgba(245, 166, 35, 0.3);
+            border-radius: 20px; padding: 0; max-width: 420px; width: 100%; overflow: hidden;
+            transform: scale(0.8) translateY(40px); transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+            box-shadow: 0 0 60px rgba(245, 166, 35, 0.15), 0 25px 50px rgba(0,0,0,0.5);
+        }
+        .voucher-overlay.show .voucher-card { transform: scale(1) translateY(0); }
+        .voucher-banner-img { width: 100%; height: auto; display: block; }
+        .voucher-header { background: linear-gradient(135deg, var(--red-primary), var(--gold-primary)); padding: 24px; text-align: center; position: relative; }
+        .voucher-badge { display: inline-block; font-size: 12px; font-weight: 600; background: rgba(255,255,255,0.2); padding: 4px 14px; border-radius: 20px; margin-bottom: 10px; color: var(--white); text-transform: uppercase; }
+        .voucher-percent { font-size: 56px; font-weight: 900; line-height: 1; margin-bottom: 4px; text-shadow: 0 4px 12px rgba(0,0,0,0.3); color: var(--white); }
+        .voucher-percent span { font-size: 28px; vertical-align: super; }
+        .voucher-label { font-size: 16px; font-weight: 500; opacity: 0.9; color: var(--white); }
+        .voucher-body { padding: 28px 24px; text-align: center; }
+        .voucher-code-label { font-size: 12px; color: var(--text-muted); text-transform: uppercase; margin-bottom: 10px; }
+        .voucher-code { font-size: 28px; font-weight: 800; letter-spacing: 4px; color: var(--gold-primary); background: rgba(245, 166, 35, 0.1); border: 2px dashed rgba(245, 166, 35, 0.4); border-radius: var(--radius-xs); padding: 14px 20px; margin-bottom: 16px; user-select: all; }
+        .voucher-customer { font-size: 14px; color: #D4A07A; margin-bottom: 20px; line-height: 1.6; }
+        .voucher-customer strong { color: var(--white); }
+        .voucher-expiry { font-size: 13px; color: #D4A07A; font-style: italic; margin-bottom: 16px; }
+        .voucher-instructions { background: rgba(245, 166, 35, 0.08); border: 1px solid rgba(245, 166, 35, 0.2); border-radius: var(--radius-xs); padding: 14px 16px; margin-bottom: 20px; }
+        .voucher-instructions p { font-size: 13px; color: var(--gold-accent); line-height: 1.5; }
+        .btn-close-voucher { width: 100%; padding: 12px; border: 1px solid rgba(245, 166, 35, 0.3); border-radius: var(--radius-xs); background: transparent; color: #D4A07A; font-size: 14px; cursor: pointer; transition: all 0.3s ease; }
+        .btn-close-voucher:hover { background: rgba(245, 166, 35, 0.1); color: var(--gold-light); border-color: var(--gold-primary); }
+        
+        .container { position: relative; z-index: 1; max-width: 800px; margin: 0 auto; padding: 20px 16px 60px; }
+        .header { text-align: center; padding: 32px 0 28px; }
+        .header h1 { font-size: 26px; font-weight: 800; margin-bottom: 8px; background: linear-gradient(135deg, var(--white), var(--gold-light)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .header p { color: #D4A07A; font-size: 14px; line-height: 1.5; }
+        .stats-bar { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 32px; }
+        .stat-item { background: rgba(255, 255, 255, 0.06); border: 1px solid rgba(245, 166, 35, 0.15); border-radius: var(--radius-sm); padding: 16px 12px; text-align: center; }
+        .stat-value { font-size: 22px; font-weight: 700; color: var(--gold-primary); margin-bottom: 2px; }
+        .stat-label { font-size: 11px; color: #B89070; text-transform: uppercase; }
+        .section-title { display: flex; align-items: center; gap: 10px; margin-bottom: 20px; }
+        .section-title .icon { width: 36px; height: 36px; border-radius: 10px; background: linear-gradient(135deg, var(--red-primary), var(--gold-primary)); display: flex; align-items: center; justify-content: center; font-size: 18px; }
+        .section-title h2 { font-size: 20px; font-weight: 700; color: var(--white); }
+        .section-title .count { margin-left: auto; font-size: 12px; color: #B89070; background: rgba(255, 255, 255, 0.06); padding: 4px 10px; border-radius: 20px; border: 1px solid rgba(245, 166, 35, 0.15); }
+        
+        .stores-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; }
+        .store-card { background: linear-gradient(145deg, var(--cream), #FFE8CC); border: 2px solid rgba(193, 154, 107, 0.4); border-radius: var(--radius); padding: 20px 16px; text-align: center; transition: all 0.3s ease; position: relative; overflow: hidden; }
+        .store-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 4px; background: linear-gradient(90deg, var(--red-primary), var(--gold-primary)); }
+        .store-card:hover { transform: translateY(-4px); box-shadow: 0 12px 30px rgba(0,0,0,0.2); border-color: var(--gold-primary); }
+        .store-card-icon { width: 52px; height: 52px; border-radius: 50%; background: linear-gradient(135deg, var(--red-primary), var(--gold-primary)); display: flex; align-items: center; justify-content: center; font-size: 24px; margin: 0 auto 12px; }
+        .store-card-name { font-size: 14px; font-weight: 700; color: var(--text-dark); margin-bottom: 8px; }
+        .store-card-address { font-size: 11px; color: var(--text-body); line-height: 1.5; margin-bottom: 12px; }
+        .store-card-discount { display: inline-block; padding: 4px 14px; border-radius: 20px; font-size: 13px; font-weight: 700; background: linear-gradient(135deg, var(--red-primary), var(--red-bright)); color: var(--white); }
+        
+        .floating-cta { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); z-index: 100; opacity: 0; pointer-events: none; transition: all 0.4s ease; }
+        .floating-cta.show { opacity: 1; pointer-events: all; }
+        .btn-get-voucher { display: flex; align-items: center; gap: 8px; padding: 14px 28px; border: none; border-radius: 50px; background: linear-gradient(135deg, var(--red-primary), var(--gold-primary)); color: white; font-size: 15px; font-weight: 600; cursor: pointer; box-shadow: 0 8px 32px rgba(192, 57, 43, 0.5); }
+        .footer { text-align: center; padding: 32px 0 20px; border-top: 1px solid rgba(245, 166, 35, 0.15); margin-top: 40px; }
+        .footer p { font-size: 12px; color: #8B6B5B; line-height: 1.6; }
+
+        @media (max-width: 480px) {
+            .popup { padding: 28px 20px; }
+            .stores-grid { gap: 10px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-gradient"></div>
+
+    <section class="hero-page" id="heroPage">
+        <div class="hero-wrapper">
+            <img src="hero-cta.png" alt="ASG Voucher Khuyến Mãi" class="hero-main-img">
+            
+            <button class="btn-invisible" id="btnOpenForm" aria-label="Mở Voucher"></button>
+        </div>
+    </section>
+
+    <div class="overlay hidden" id="formOverlay">
+        <div class="popup">
+            <button type="button" class="btn-close-form" id="btnCloseForm" aria-label="Đóng biểu mẫu">&times;</button>
+            
+            <div class="popup-icon">🎁</div>
+            <h2>Nhận Voucher Giảm 10%</h2>
+            <p class="subtitle">Điền thông tin bên dưới để nhận mã giảm giá<br>áp dụng cho lần mua hàng tiếp theo!</p>
+
+            <form id="customerForm" novalidate>
+                <div class="form-group">
+                    <label>Họ và tên <span class="required">*</span></label>
+                    <input type="text" id="fullName" placeholder="Nguyễn Văn A" required autocomplete="name">
+                    <div class="error-msg">Vui lòng nhập họ tên</div>
+                </div>
+                <div class="form-group">
+                    <label>Số điện thoại <span class="required">*</span></label>
+                    <input type="tel" id="phone" placeholder="0912 345 678" required autocomplete="tel">
+                    <div class="error-msg">Vui lòng nhập số điện thoại hợp lệ</div>
+                </div>
+                <div class="form-group">
+                    <label>Địa chỉ <span class="required">*</span></label>
+                    <input type="text" id="address" placeholder="123 Đường ABC, Quận XYZ" required autocomplete="street-address">
+                    <div class="error-msg">Vui lòng nhập địa chỉ</div>
+                </div>
+                <button type="submit" class="btn-submit" id="submitBtn">
+                    <span>🎉 Nhận Voucher Ngay</span>
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <div class="voucher-overlay" id="voucherOverlay">
+        <div class="voucher-card">
+            <img src="voucher-banner.png" alt="Voucher Giảm 10%" class="voucher-banner-img" onerror="this.style.display='none'; document.querySelector('.voucher-header').style.display='flex';">
+            <div class="voucher-header" style="display:none; flex-direction:column; align-items:center;">
+                <div class="voucher-badge">✨ Voucher Ưu Đãi</div>
+                <div class="voucher-percent">10<span>%</span></div>
+                <div class="voucher-label">Giảm giá cho hóa đơn mua sắm & dịch vụ</div>
+            </div>
+            <div class="voucher-body">
+                <div class="voucher-code-label">Mã voucher của bạn</div>
+                <div class="voucher-code" id="voucherCode">---</div>
+                <div class="voucher-customer" id="voucherCustomer"></div>
+                <div class="voucher-expiry">Hạn sử dụng: 31/06/2026</div>
+                <div class="voucher-instructions">
+                    <p>Chụp màn hình để lưu mã. Khi đến cửa hàng, đưa ảnh chụp cho nhân viên để được xác nhận giảm giá.</p>
+                </div>
+                <button class="btn-close-voucher" id="closeVoucher">Xem danh sách cửa hàng áp dụng →</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="container" id="mainContent">
+        <header class="header">
+            <div class="header-logo"><img src="ASG-logo-ngang.png" alt="ASG Logo" style="width: 100px; height: auto;"></div>
+            <h1>Chương Trình Ưu Đãi</h1>
+            <p>Voucher giảm giá 10% tại các cửa hàng trong Cảng HKQT Nội Bài</p>
+        </header>
+
+        <div class="stats-bar">
+            <div class="stat-item">
+                <div class="stat-value" id="locationCount">4</div>
+                <div class="stat-label">Cửa hàng</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value">10%</div>
+                <div class="stat-label">Giảm giá</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value">T1 & T2</div>
+                <div class="stat-label">Nhà ga</div>
+            </div>
+        </div>
+
+        <div>
+            <div class="section-title">
+                <div class="icon">📍</div>
+                <h2>Danh Sách Cửa Hàng</h2>
+                <span class="count" id="locationCountBadge">4 cửa hàng</span>
+            </div>
+            <div class="stores-grid" id="storesGrid"></div>
+        </div>
+
+        <footer class="footer">
+            <p>Voucher có giá trị đến ngày 31/06/2026.<br>Không áp dụng đồng thời với các chương trình khuyến mãi khác.<br>© 2026 ASG - Cảng HKQT Nội Bài</p>
+        </footer>
+    </div>
+
+    <div class="floating-cta" id="floatingCTA">
+        <button class="btn-get-voucher" id="btnGetVoucher">
+            🎁 Nhận Voucher Giảm Giá
+        </button>
+    </div>
+
+    <script>
+        const STORES = [
+            { name: "An Kitchen", address: "Sảnh D, nhà ga quốc nội T1, Cảng HKQT Nội Bài", discount: 10, icon: "🍜" },
+            { name: "Cửa hàng Bánh Mỳ Phố", address: "Sảnh E, nhà ga quốc nội T1, Cảng HKQT Nội Bài", discount: 10, icon: "🥖" },
+            { name: "ASG Sky Lounge", address: "Sảnh E, nhà ga quốc nội T1, Cảng HKQT Nội Bài", discount: 10, icon: "✈️" },
+            { name: "Ngọc Bảo Linh Souvenir", address: "Cánh Tây, nhà ga quốc tế T2, Cảng HKQT Nội Bài", discount: 10, icon: "🎁" }
+        ];
+
+        function renderStores() {
+            const grid = document.getElementById('storesGrid');
+            grid.innerHTML = STORES.map(store => `
+                <div class="store-card">
+                    <div class="store-card-icon">${store.icon}</div>
+                    <div class="store-card-name">${store.name}</div>
+                    <div class="store-card-address">${store.address}</div>
+                    <div class="store-card-discount">-${store.discount}%</div>
+                </div>
+            `).join('');
+        }
+
+        function generateVoucherCode() {
+            const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+            let code = 'ASG-';
+            for (let i = 0; i < 6; i++) { code += chars.charAt(Math.floor(Math.random() * chars.length)); }
+            return code;
+        }
+
+        function validateForm() {
+            const name = document.getElementById('fullName'), phone = document.getElementById('phone'), address = document.getElementById('address');
+            let valid = true;
+            if (!name.value.trim()) { name.classList.add('error'); valid = false; } else { name.classList.remove('error'); }
+            const phoneRegex = /^(0|\+84)(3|5|7|8|9)[0-9]{8}$/;
+            if (!phoneRegex.test(phone.value.replace(/[\s\-\.]/g, ''))) { phone.classList.add('error'); valid = false; } else { phone.classList.remove('error'); }
+            if (!address.value.trim()) { address.classList.add('error'); valid = false; } else { address.classList.remove('error'); }
+            return valid;
+        }
+
+        // --- NEW BEHAVIORS BÊN DƯỚI --- //
+        
+        // 1. Mở popup form tự động khi trang vừa load xong
+        window.addEventListener('DOMContentLoaded', () => {
+            setTimeout(() => {
+                document.getElementById('formOverlay').classList.remove('hidden');
+            }, 600); // Đợi 0.6s cho mượt mắt rồi hất popup ra
+        });
+
+        // 2. Nút bấm tàng hình trên ảnh Hero (click thủ công)
+        document.getElementById('btnOpenForm').addEventListener('click', function() {
+            document.getElementById('formOverlay').classList.remove('hidden');
+        });
+
+        // 3. Nút [X] đóng Form
+        document.getElementById('btnCloseForm').addEventListener('click', function() {
+            document.getElementById('formOverlay').classList.add('hidden');
+        });
+
+        // ------------------------------ //
+
+        document.getElementById('customerForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            if (!validateForm()) return;
+
+            const name = document.getElementById('fullName').value.trim();
+            const phone = document.getElementById('phone').value.trim();
+            const code = generateVoucherCode();
+
+            document.getElementById('formOverlay').classList.add('hidden');
+
+            setTimeout(() => {
+                document.getElementById('voucherCode').textContent = code;
+                document.getElementById('voucherCustomer').innerHTML = `Khách hàng: <strong>${name}</strong><br>SĐT: ${phone}`;
+                document.getElementById('voucherOverlay').classList.add('show');
+            }, 300);
+        });
+
+        document.querySelectorAll('.form-group input').forEach(input => {
+            input.addEventListener('input', () => input.classList.remove('error'));
+        });
+
+        document.getElementById('closeVoucher').addEventListener('click', function() {
+            document.getElementById('voucherOverlay').classList.remove('show');
+        });
+
+        document.getElementById('btnGetVoucher').addEventListener('click', function() {
+            document.getElementById('formOverlay').classList.remove('hidden');
+        });
+
+        const observer = new MutationObserver(() => {
+            const formHidden = document.getElementById('formOverlay').classList.contains('hidden');
+            const voucherHidden = !document.getElementById('voucherOverlay').classList.contains('show');
+            const cta = document.getElementById('floatingCTA');
+            if (formHidden && voucherHidden) { cta.classList.add('show'); } else { cta.classList.remove('show'); }
+        });
+        observer.observe(document.getElementById('formOverlay'), { attributes: true });
+        observer.observe(document.getElementById('voucherOverlay'), { attributes: true });
+
+        renderStores();
+    </script>
+</body>
+</html>
